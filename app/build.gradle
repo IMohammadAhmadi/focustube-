@@ -23,47 +23,26 @@ android {
         buildConfigField 'String', 'SKYTUBE_ISSUES_URL', '"https://github.com/SkyTubeTeam/SkyTube/issues/new/choose"'
         buildConfigField 'String', 'SKYTUBE_UPDATES_URL', '"https://api.github.com/repos/SkyTubeTeam/SkyTube/releases/latest"'
         buildConfigField 'long', 'BUILD_TIME', String.valueOf(System.currentTimeMillis()) + 'L'
+        buildConfigField 'String', 'FLAVOR', '"oss"'
         vectorDrawables.useSupportLibrary true
         multiDexEnabled true    // as we have over 65536 lines of code...
+    }
+    signingConfigs {
+        debugConfig {
+            storeFile file("${rootDir}/debug.keystore")
+            storePassword "android"
+            keyAlias "androiddebugkey"
+            keyPassword "android"
+        }
     }
     buildTypes {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            buildConfigField "String", "CHROMECAST_APP_ID", "\"39E8D587\""
         }
         debug {
+            signingConfig signingConfigs.debugConfig
             minifyEnabled false
-            buildConfigField "String", "CHROMECAST_APP_ID", "\"29A66E17\"" // dev
-        }
-        snapshot {
-            initWith debug
-            applicationIdSuffix ".snapshot"
-            resValue "string", "app_name", "SkyTube Snapshot"
-        }
-    }
-    flavorDimensions "skytube"
-    productFlavors {
-        // 100% Open-Source Edition
-        oss {
-            applicationIdSuffix ".oss"
-            resValue "string", "app_name", "SkyTube"
-            resValue "string", "app_flavor", "OSS"
-            dimension "skytube"
-            buildConfigField 'String[]', 'YOUTUBE_API_KEYS', '{}'
-        }
-        // 99% Open-source edition:  uses the YouTube Player Jar [i.e. proprietary module - optional usage]
-        extra {
-            applicationIdSuffix ".extra"
-            resValue "string", "app_name", "SkyTube Extra"
-            resValue "string", "app_flavor", "Extra"
-            dimension "skytube"
-        }
-    }
-    // Generate APK filenames as follows:  <App Name>-<Flavor><Version>
-    applicationVariants.all { variant ->
-        outputs.all { output ->
-            outputFileName = "${parent.name}-${productFlavors[0].name.capitalize()}-${versionName}.apk"
         }
     }
     // Ignore missing translations
@@ -197,14 +176,6 @@ dependencies {
     // debugImplementation because LeakCanary should only run in debug builds
     // Memory leak detection
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.10'
-
-/** Flavor **/
-    // Proprietary modules
-    // Official YouTube Android Player API
-    extraImplementation files('libs/YouTubeAndroidPlayerApi.jar')
-    extraImplementation 'com.google.android.gms:play-services-cast-framework:20.0.0'
-    extraImplementation 'com.sothree.slidinguppanel:library:3.4.0'
-    extraImplementation 'com.github.rahatarmanahmed:circularprogressview:2.5.0'
 
 /** Testing **/
     // Required for local unit tests (JUnit 5 framework)
